@@ -1,0 +1,77 @@
+name: "m3-embeddings"
+backend: "python"
+max_batch_size: 32
+
+# Входные параметры
+input [
+  {
+    name: "TEXT"
+    data_type: TYPE_STRING
+    dims: [ -1 ]
+  }
+]
+
+# Выходные параметры
+output [
+  {
+    name: "DENSE"
+    data_type: TYPE_FP16  # или TYPE_FP32 если use_fp16=false
+    dims: [ -1 ]
+  },
+  {
+    name: "SPARSE"
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  }
+]
+
+# Параметры модели
+parameters: {
+  key: "model_path"
+  value: {
+    string_value: "/models/m3-embeddings/1/model.onnx"
+  }
+}
+
+parameters: {
+  key: "tokenizer_path"
+  value: {
+    string_value: "/models/m3-embeddings/1/tokenizer"
+  }
+}
+
+parameters: {
+  key: "max_length"
+  value: {
+    string_value: "8192"
+  }
+}
+
+parameters: {
+  key: "use_fp16"
+  value: {
+    string_value: "true"
+  }
+}
+
+parameters: {
+  key: "internal_batch_size"
+  value: {
+    string_value: "12"
+  }
+}
+
+# Dynamic batching для оптимизации
+dynamic_batching {
+  preferred_batch_size: [ 4, 8, 16 ]
+  max_queue_delay_microseconds: 100
+}
+
+# Инстансы модели
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+    gpus: [ 0 ]
+  }
+]

@@ -1,0 +1,25 @@
+name: "qwen3_reranker"
+backend: "python"
+max_batch_size: 8
+
+input [
+  {
+    name: "TEXT"
+    data_type: TYPE_STRING
+    dims: [-1]
+  }
+]
+
+output [
+  {
+    name: "logits"
+    data_type: TYPE_FP32
+    dims: [2]
+  }
+]
+
+instance_group [
+  {
+    kind: KIND_GPU
+  }
+]
